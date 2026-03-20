@@ -8,6 +8,42 @@ const ShaderBackground = dynamic(() => import("@/components/ShaderBackground"), 
   ssr: false,
 });
 
+/* ─── Scroll-triggered reveal animation ─── */
+function useReveal(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.unobserve(el); } },
+      { threshold }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return { ref, visible };
+}
+
+function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const { ref, visible } = useReveal(0.12);
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(32px)",
+        transition: `opacity 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}s, transform 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}s`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 const career = [
   {
     company: "Mytra",
@@ -190,11 +226,13 @@ export default function Home() {
         {/* About Section */}
         <section id="about" className="py-28 sm:py-32 px-6">
           <div className="max-w-4xl mx-auto">
+            <Reveal>
             <div className="backdrop-blur-xl bg-black/70 border border-white/10 rounded-2xl p-8 sm:p-12">
               <h2 className="text-3xl font-bold mb-8">
                 About<span className="text-emerald-400">.</span>
               </h2>
               <div className="grid sm:grid-cols-2 gap-8">
+                <Reveal delay={0.15}>
                 <div>
                   <p className="text-white/70 leading-relaxed mb-6">
                     EHS professional with a unique trajectory — from electronic music production
@@ -210,6 +248,8 @@ export default function Home() {
                     technology — designing tools that make compliance intuitive and data-driven.
                   </p>
                 </div>
+                </Reveal>
+                <Reveal delay={0.3}>
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-3">
@@ -240,21 +280,25 @@ export default function Home() {
                     <p className="text-white/70 text-sm">BS — Florida State University</p>
                   </div>
                 </div>
+                </Reveal>
               </div>
             </div>
+            </Reveal>
           </div>
         </section>
 
         {/* Career Section */}
         <section id="career" className="py-28 sm:py-32 px-6">
           <div className="max-w-4xl mx-auto">
+            <Reveal>
             <h2 className="text-3xl font-bold mb-12 text-center">
               Career<span className="text-emerald-400">.</span>
             </h2>
+            </Reveal>
             <div className="space-y-6">
               {career.map((job, i) => (
+                <Reveal key={i} delay={i * 0.1}>
                 <div
-                  key={i}
                   className="backdrop-blur-xl bg-black/60 border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-emerald-500/20 hover:bg-black/70 transition-all duration-300 group"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
@@ -279,6 +323,7 @@ export default function Home() {
                     ))}
                   </ul>
                 </div>
+                </Reveal>
               ))}
             </div>
           </div>
@@ -287,13 +332,15 @@ export default function Home() {
         {/* Projects Section */}
         <section id="projects" className="py-28 sm:py-32 px-6">
           <div className="max-w-5xl mx-auto">
+            <Reveal>
             <h2 className="text-3xl font-bold mb-12 text-center">
               Projects<span className="text-emerald-400">.</span>
             </h2>
+            </Reveal>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {projects.map((project, i) => (
+                <Reveal key={i} delay={i * 0.08}>
                 <div
-                  key={i}
                   className={`backdrop-blur-xl bg-black/60 border rounded-2xl p-6 hover:border-emerald-500/30 hover:bg-black/70 transition-all duration-300 group ${
                     project.highlight
                       ? "border-emerald-500/20 sm:col-span-2 lg:col-span-1"
@@ -335,6 +382,7 @@ export default function Home() {
                     </div>
                   )}
                 </div>
+                </Reveal>
               ))}
             </div>
           </div>
@@ -343,6 +391,7 @@ export default function Home() {
         {/* Music Section */}
         <section className="py-28 sm:py-32 px-6">
           <div className="max-w-4xl mx-auto">
+            <Reveal>
             <div className="backdrop-blur-xl bg-black/70 border border-white/10 rounded-2xl p-8 sm:p-12 text-center">
               <h2 className="text-3xl font-bold mb-6">
                 Former Life<span className="text-emerald-400">.</span>
@@ -362,12 +411,14 @@ export default function Home() {
                 </span>
               </div>
             </div>
+            </Reveal>
           </div>
         </section>
 
         {/* Contact Section */}
         <section id="contact" className="py-28 sm:py-32 px-6">
           <div className="max-w-2xl mx-auto text-center">
+            <Reveal>
             <div className="backdrop-blur-xl bg-black/70 border border-white/10 rounded-2xl p-8 sm:p-12">
               <h2 className="text-3xl font-bold mb-4">
                 Get in Touch<span className="text-emerald-400">.</span>
@@ -404,6 +455,7 @@ export default function Home() {
                 </a>
               </div>
             </div>
+            </Reveal>
           </div>
         </section>
 
