@@ -91,41 +91,60 @@ const fragmentShader = `
     vec2 aspect = vec2(uResolution.x / uResolution.y, 1.0);
     vec2 st = uv * aspect;
 
-    // Mouse influence with smooth falloff
+    // Mouse influence — strong, obvious displacement
     vec2 mouseNorm = uMouse * aspect;
     float mouseDist = length(st - mouseNorm);
-    float mouseInfluence = smoothstep(1.2, 0.0, mouseDist) * 0.15;
+    float mouseInfluence = smoothstep(1.5, 0.0, mouseDist) * 0.45;
 
-    // Layered noise for organic flow
-    float t = uTime * 0.12;
-    float n1 = snoise(vec3(st * 1.4 + mouseInfluence, t));
-    float n2 = snoise(vec3(st * 2.8 - mouseInfluence * 0.5, t * 1.3 + 10.0));
-    float n3 = snoise(vec3(st * 0.7, t * 0.7 + 5.0));
+    // Faster animation speed
+    float t = uTime * 0.25;
 
-    float flow = n1 * 0.5 + n2 * 0.3 + n3 * 0.2;
+    // Layered noise for organic aurora flow
+    float n1 = snoise(vec3(st * 1.2 + mouseInfluence, t));
+    float n2 = snoise(vec3(st * 2.4 - mouseInfluence * 0.7, t * 1.4 + 10.0));
+    float n3 = snoise(vec3(st * 0.6, t * 0.8 + 5.0));
+    float n4 = snoise(vec3(st * 3.5 + vec2(mouseInfluence * 0.3), t * 0.6 + 20.0));
 
-    // Color palette: emerald green → deep blue → purple
-    vec3 emerald = vec3(0.0, 0.78, 0.55);
-    vec3 deepBlue = vec3(0.05, 0.12, 0.45);
-    vec3 purple = vec3(0.35, 0.05, 0.55);
-    vec3 dark = vec3(0.02, 0.03, 0.08);
+    float flow = n1 * 0.45 + n2 * 0.30 + n3 * 0.15 + n4 * 0.10;
 
-    // Blend colors based on noise and position
-    float blend1 = smoothstep(-0.5, 0.5, flow + uv.y * 0.3 - 0.2);
-    float blend2 = smoothstep(-0.3, 0.7, flow - uv.x * 0.2 + 0.1);
+    // Vivid aurora color palette
+    vec3 emerald  = vec3(0.063, 0.725, 0.506);  // #10b981
+    vec3 blue     = vec3(0.231, 0.510, 0.965);  // #3b82f6
+    vec3 purple   = vec3(0.545, 0.361, 0.965);  // #8b5cf6
+    vec3 teal     = vec3(0.078, 0.894, 0.776);  // bright teal accent
+    vec3 dark     = vec3(0.02, 0.02, 0.06);
 
-    vec3 color = mix(emerald, deepBlue, blend1);
-    color = mix(color, purple, blend2 * 0.6);
+    // Dynamic color blending based on noise + position
+    float blend1 = smoothstep(-0.4, 0.5, flow + uv.y * 0.4 - 0.15);
+    float blend2 = smoothstep(-0.3, 0.6, flow - uv.x * 0.3 + 0.15);
+    float blend3 = smoothstep(-0.2, 0.4, n4 + sin(t * 0.5) * 0.3);
 
-    // Darken edges with vignette
-    float vignette = 1.0 - smoothstep(0.3, 1.4, length(uv - 0.5) * 1.6);
-    color = mix(dark, color, vignette * 0.7 + 0.3);
+    vec3 color = mix(emerald, blue, blend1);
+    color = mix(color, purple, blend2 * 0.65);
+    color = mix(color, teal, blend3 * 0.25);
 
-    // Subtle brightness variation
-    color *= 0.35 + 0.15 * sin(flow * 3.14159);
+    // Aurora glow — bright streaks
+    float aurora = pow(abs(sin(flow * 3.14159 + t * 0.3)), 2.0) * 0.4;
+    color += emerald * aurora * (1.0 - blend1);
+    color += blue * aurora * blend1 * 0.5;
 
-    // Keep it dark and moody
-    color = mix(dark, color, 0.85);
+    // Mouse glow — bright spot near cursor
+    float mouseGlow = smoothstep(0.8, 0.0, mouseDist) * 0.35;
+    color += teal * mouseGlow;
+
+    // Gentle vignette — less aggressive than before
+    float vignette = 1.0 - smoothstep(0.5, 1.6, length(uv - 0.5) * 1.4);
+
+    // Final color: keep it bright! Mix with dark for depth, not muddiness
+    color *= 0.6 + 0.4 * sin(flow * 2.0 + t * 0.2);  // pulsing brightness
+    color = mix(dark, color, vignette * 0.85 + 0.15);
+
+    // Boost saturation
+    float luminance = dot(color, vec3(0.299, 0.587, 0.114));
+    color = mix(vec3(luminance), color, 1.4);
+
+    // Ensure minimum brightness so colors pop
+    color = max(color, dark * 1.5);
 
     gl_FragColor = vec4(color, 1.0);
   }
@@ -138,20 +157,19 @@ export default function ShaderBackground() {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Skip WebGL on mobile devices to save battery and improve performance
-    const isMobile = window.innerWidth < 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-    if (isMobile) {
-      containerRef.current.style.background =
-        "radial-gradient(ellipse at 30% 40%, rgba(0,50,40,0.6) 0%, rgba(5,12,45,0.4) 50%, rgba(2,3,8,1) 100%)";
-      return;
-    }
+    const isMobile =
+      window.innerWidth < 768 ||
+      /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
     const scene = new THREE.Scene();
     const camera = new THREE.Camera();
     camera.position.z = 1;
 
     const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // Mobile: half resolution for performance. Desktop: full DPR (capped at 2).
+    const pixelRatio = isMobile ? 0.5 : Math.min(window.devicePixelRatio, 2);
+    renderer.setPixelRatio(pixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     containerRef.current.appendChild(renderer.domElement);
 
@@ -177,13 +195,16 @@ export default function ShaderBackground() {
       uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
     };
 
+    // Only add mouse tracking on desktop
     const handleMouseMove = (e: MouseEvent) => {
       mouseRef.current.x = e.clientX / window.innerWidth;
       mouseRef.current.y = 1.0 - e.clientY / window.innerHeight;
     };
 
     window.addEventListener("resize", handleResize);
-    window.addEventListener("mousemove", handleMouseMove);
+    if (!isMobile) {
+      window.addEventListener("mousemove", handleMouseMove);
+    }
 
     let animationId: number;
     const clock = new THREE.Clock();
@@ -192,11 +213,14 @@ export default function ShaderBackground() {
       animationId = requestAnimationFrame(animate);
       uniforms.uTime.value = clock.getElapsedTime();
 
-      // Smooth mouse follow
-      uniforms.uMouse.value.x +=
-        (mouseRef.current.x - uniforms.uMouse.value.x) * 0.05;
-      uniforms.uMouse.value.y +=
-        (mouseRef.current.y - uniforms.uMouse.value.y) * 0.05;
+      if (!isMobile) {
+        // Smooth mouse follow on desktop
+        uniforms.uMouse.value.x +=
+          (mouseRef.current.x - uniforms.uMouse.value.x) * 0.05;
+        uniforms.uMouse.value.y +=
+          (mouseRef.current.y - uniforms.uMouse.value.y) * 0.05;
+      }
+      // On mobile, mouse stays at (0.5, 0.5) — centered, no interaction
 
       renderer.render(scene, camera);
     };
@@ -205,7 +229,9 @@ export default function ShaderBackground() {
     return () => {
       cancelAnimationFrame(animationId);
       window.removeEventListener("resize", handleResize);
-      window.removeEventListener("mousemove", handleMouseMove);
+      if (!isMobile) {
+        window.removeEventListener("mousemove", handleMouseMove);
+      }
       renderer.dispose();
       geometry.dispose();
       material.dispose();
