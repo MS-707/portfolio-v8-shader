@@ -236,10 +236,8 @@ export default function Home() {
                 <div>
                   <p className="text-white/70 leading-relaxed mb-6">
                     EHS professional with a unique trajectory — from electronic music production
-                    on Dirtybird Records and BBC Radio 1 to creating safety programs at the
-                    frontier of AI robotics. The pattern recognition and systems thinking that
-                    made the music work now drive how I approach hazard analysis, regulatory
-                    compliance, and program design.
+                    on Dirtybird Records and BBC Radio 1. I also create safety programs at the
+                    frontier of AI robotics — and the AI-powered tools to support them.
                   </p>
                   <p className="text-white/70 leading-relaxed">
                     Currently the first dedicated EHS hire at an AI robotics startup, where I
@@ -394,13 +392,11 @@ export default function Home() {
             <Reveal>
             <div className="backdrop-blur-xl bg-black/70 border border-white/10 rounded-2xl p-8 sm:p-12 text-center">
               <h2 className="text-3xl font-bold mb-6">
-                Former Life<span className="text-emerald-400">.</span>
+                Music<span className="text-emerald-400">.</span>
               </h2>
               <p className="text-white/70 leading-relaxed max-w-2xl mx-auto mb-6">
-                Before safety engineering, I produced electronic music — released on
-                Dirtybird Records and featured on BBC Radio 1. The pattern recognition,
-                systems thinking, and obsessive attention to detail carried over completely.
-                Different medium, same wiring.
+                I produce electronic music — released on
+                Dirtybird Records and featured on BBC Radio 1.
               </p>
               <div className="flex items-center justify-center gap-4 text-sm text-white/40">
                 <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
