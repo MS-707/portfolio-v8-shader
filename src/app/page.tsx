@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Mail, Github, Linkedin, ExternalLink, ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { Mail, Github, Linkedin, ExternalLink, ChevronDown, Menu, X } from "lucide-react";
 
 const ShaderBackground = dynamic(() => import("@/components/ShaderBackground"), {
   ssr: false,
@@ -15,18 +16,8 @@ const career = [
     period: "2025 — Present",
     details: [
       "First dedicated EHS hire at an AI robotics startup",
-      "Functional safety for autonomous systems and cobots",
+      "Functional safety for autonomous systems and collaborative robots",
       "Hackathon winner — created BOM Watch for chemical compliance",
-    ],
-  },
-  {
-    company: "AeroVironment",
-    role: "EHS Specialist",
-    industry: "Aerospace & Defense",
-    period: "2023 — 2025",
-    details: [
-      "Safety programs for aerospace manufacturing operations",
-      "Regulatory compliance across multiple defense programs",
     ],
   },
   {
@@ -35,8 +26,18 @@ const career = [
     industry: "Manufacturing",
     period: "2024 — 2025",
     details: [
-      "Large-scale manufacturing safety across distribution operations",
-      "Fleet safety and environmental compliance programs",
+      "Led safety programs across large-scale manufacturing and distribution",
+      "Fleet safety and environmental compliance for multi-site operations",
+    ],
+  },
+  {
+    company: "AeroVironment",
+    role: "EHS Specialist",
+    industry: "Aerospace & Defense",
+    period: "2023 — 2024",
+    details: [
+      "Safety programs for aerospace manufacturing operations",
+      "Regulatory compliance across classified defense programs",
     ],
   },
   {
@@ -45,7 +46,7 @@ const career = [
     industry: "Startup",
     period: "2016 — 2023",
     details: [
-      "Created safety infrastructure from scratch across multiple verticals",
+      "Created safety infrastructure from the ground up across multiple verticals",
       "Scaled EHS programs through rapid growth phases",
     ],
   },
@@ -73,27 +74,29 @@ const projects = [
   },
   {
     name: "Red Alarm",
-    description: "Emergency notification and incident response coordination platform.",
+    description: "Emergency notification and incident response coordination platform for rapid mobilization.",
     tags: ["Safety", "Notifications"],
   },
   {
     name: "Digital SDS",
-    description: "Digital safety data sheet management system for chemical inventory compliance.",
+    description: "Digital safety data sheet management system for chemical inventory and GHS compliance.",
     tags: ["GHS", "Chemical Safety"],
   },
   {
     name: "Agentic Compliance",
-    description: "AI-powered regulatory compliance monitoring using autonomous agents.",
+    description: "AI-powered regulatory compliance monitoring using autonomous agents to flag changes in real time.",
     tags: ["AI Agents", "Compliance"],
   },
   {
     name: "BuyBot",
-    description: "Automated procurement assistant for safety equipment and supplies.",
+    description: "Automated procurement assistant for safety equipment and supplies sourcing.",
     tags: ["Automation", "Procurement"],
   },
 ];
 
 export default function Home() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <>
       <ShaderBackground />
@@ -107,12 +110,28 @@ export default function Home() {
               Mark<span className="text-emerald-400">Starr</span>
             </span>
             <div className="hidden sm:flex items-center gap-8 text-sm text-white/60">
-              <a href="#about" className="hover:text-white transition-colors">About</a>
-              <a href="#career" className="hover:text-white transition-colors">Career</a>
-              <a href="#projects" className="hover:text-white transition-colors">Projects</a>
-              <a href="#contact" className="hover:text-white transition-colors">Contact</a>
+              <a href="#about" className="hover:text-white transition-colors duration-200">About</a>
+              <a href="#career" className="hover:text-white transition-colors duration-200">Career</a>
+              <a href="#projects" className="hover:text-white transition-colors duration-200">Projects</a>
+              <a href="#contact" className="hover:text-white transition-colors duration-200">Contact</a>
             </div>
+            <button
+              className="sm:hidden p-2 text-white/60 hover:text-white transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle navigation menu"
+            >
+              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
           </div>
+          {/* Mobile menu */}
+          {mobileMenuOpen && (
+            <div className="sm:hidden backdrop-blur-xl bg-black/80 border-t border-white/5 px-6 py-4 flex flex-col gap-4 text-sm text-white/60">
+              <a href="#about" onClick={() => setMobileMenuOpen(false)} className="hover:text-white transition-colors py-1">About</a>
+              <a href="#career" onClick={() => setMobileMenuOpen(false)} className="hover:text-white transition-colors py-1">Career</a>
+              <a href="#projects" onClick={() => setMobileMenuOpen(false)} className="hover:text-white transition-colors py-1">Projects</a>
+              <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="hover:text-white transition-colors py-1">Contact</a>
+            </div>
+          )}
         </nav>
 
         {/* Hero Section */}
@@ -121,22 +140,22 @@ export default function Home() {
             <h1 className="text-5xl sm:text-7xl font-bold tracking-tight mb-6">
               Mark <span className="text-emerald-400">Starr</span>
             </h1>
-            <p className="text-xl sm:text-2xl text-white/70 mb-4">
+            <p className="text-xl sm:text-2xl text-white/70 font-light mb-3">
               Safety Engineer · Systems Thinker · Creator
             </p>
-            <p className="text-base text-white/40 mb-12">
-              CSP · ISO Lead Auditor · Creating safer workplaces through technology
+            <p className="text-sm sm:text-base text-white/40 tracking-wide mb-12">
+              CSP · ISO Lead Auditor · Designing safer workplaces through technology
             </p>
             <div className="flex items-center justify-center gap-6">
               <a
                 href="#projects"
-                className="px-6 py-3 bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-emerald-400 hover:bg-emerald-500/30 transition-all text-sm font-medium"
+                className="px-6 py-3 bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-emerald-400 hover:bg-emerald-500/30 transition-all duration-200 text-sm font-medium"
               >
                 View Projects
               </a>
               <a
                 href="#contact"
-                className="px-6 py-3 bg-white/5 border border-white/10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
+                className="px-6 py-3 bg-white/5 border border-white/10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all duration-200 text-sm font-medium"
               >
                 Get in Touch
               </a>
@@ -151,9 +170,9 @@ export default function Home() {
         </section>
 
         {/* About Section */}
-        <section id="about" className="py-24 px-6">
+        <section id="about" className="py-28 sm:py-32 px-6">
           <div className="max-w-4xl mx-auto">
-            <div className="backdrop-blur-xl bg-black/60 border border-white/10 rounded-2xl p-8 sm:p-12">
+            <div className="backdrop-blur-xl bg-black/70 border border-white/10 rounded-2xl p-8 sm:p-12">
               <h2 className="text-3xl font-bold mb-8">
                 About<span className="text-emerald-400">.</span>
               </h2>
@@ -163,14 +182,14 @@ export default function Home() {
                     EHS professional with a unique trajectory — from electronic music production
                     on Dirtybird Records and BBC Radio 1 to creating safety programs at the
                     frontier of AI robotics. The pattern recognition and systems thinking that
-                    made the music work now drives how I approach hazard analysis, regulatory
+                    made the music work now drive how I approach hazard analysis, regulatory
                     compliance, and program design.
                   </p>
                   <p className="text-white/70 leading-relaxed">
                     Currently the first dedicated EHS hire at an AI robotics startup, where I
                     create safety frameworks for autonomous systems navigating novel hazard
-                    territory. I think best at the intersection of safety engineering and
-                    technology — creating tools that make compliance intuitive and data-driven.
+                    territory. I do my best work at the intersection of safety engineering and
+                    technology — designing tools that make compliance intuitive and data-driven.
                   </p>
                 </div>
                 <div className="space-y-6">
@@ -190,10 +209,10 @@ export default function Home() {
                       AI Fluency
                     </h3>
                     <ul className="space-y-2 text-white/70 text-sm">
-                      <li>Self-hosted AI agent with voice + automation</li>
+                      <li>Self-hosted AI agent with voice and automation</li>
                       <li>Claude API integration and prompt engineering</li>
-                      <li>7+ deployed applications on Vercel</li>
-                      <li>AI-powered compliance and safety tools</li>
+                      <li>7+ applications created and deployed on Vercel</li>
+                      <li>AI-powered compliance and safety tools creator</li>
                     </ul>
                   </div>
                   <div>
@@ -209,7 +228,7 @@ export default function Home() {
         </section>
 
         {/* Career Section */}
-        <section id="career" className="py-24 px-6">
+        <section id="career" className="py-28 sm:py-32 px-6">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold mb-12 text-center">
               Career<span className="text-emerald-400">.</span>
@@ -218,7 +237,7 @@ export default function Home() {
               {career.map((job, i) => (
                 <div
                   key={i}
-                  className="backdrop-blur-xl bg-black/60 border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-emerald-500/20 transition-all group"
+                  className="backdrop-blur-xl bg-black/60 border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-emerald-500/20 hover:bg-black/70 transition-all duration-300 group"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
                     <div>
@@ -248,7 +267,7 @@ export default function Home() {
         </section>
 
         {/* Projects Section */}
-        <section id="projects" className="py-24 px-6">
+        <section id="projects" className="py-28 sm:py-32 px-6">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-3xl font-bold mb-12 text-center">
               Projects<span className="text-emerald-400">.</span>
@@ -257,7 +276,7 @@ export default function Home() {
               {projects.map((project, i) => (
                 <div
                   key={i}
-                  className={`backdrop-blur-xl bg-black/60 border rounded-2xl p-6 hover:border-emerald-500/30 transition-all group ${
+                  className={`backdrop-blur-xl bg-black/60 border rounded-2xl p-6 hover:border-emerald-500/30 hover:bg-black/70 transition-all duration-300 group ${
                     project.highlight
                       ? "border-emerald-500/20 sm:col-span-2 lg:col-span-1"
                       : "border-white/10"
@@ -304,9 +323,9 @@ export default function Home() {
         </section>
 
         {/* Music Section */}
-        <section className="py-24 px-6">
+        <section className="py-28 sm:py-32 px-6">
           <div className="max-w-4xl mx-auto">
-            <div className="backdrop-blur-xl bg-black/60 border border-white/10 rounded-2xl p-8 sm:p-12 text-center">
+            <div className="backdrop-blur-xl bg-black/70 border border-white/10 rounded-2xl p-8 sm:p-12 text-center">
               <h2 className="text-3xl font-bold mb-6">
                 Former Life<span className="text-emerald-400">.</span>
               </h2>
@@ -329,20 +348,20 @@ export default function Home() {
         </section>
 
         {/* Contact Section */}
-        <section id="contact" className="py-24 px-6">
+        <section id="contact" className="py-28 sm:py-32 px-6">
           <div className="max-w-2xl mx-auto text-center">
-            <div className="backdrop-blur-xl bg-black/60 border border-white/10 rounded-2xl p-8 sm:p-12">
+            <div className="backdrop-blur-xl bg-black/70 border border-white/10 rounded-2xl p-8 sm:p-12">
               <h2 className="text-3xl font-bold mb-4">
                 Get in Touch<span className="text-emerald-400">.</span>
               </h2>
               <p className="text-white/50 mb-10">
-                Open to conversations about safety engineering, AI applications in EHS,
-                or interesting problems worth solving.
+                Open to conversations about safety at the frontier of AI,
+                EHS program design, or interesting problems worth solving.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4">
                 <a
                   href="mailto:MarkStarr707@gmail.com"
-                  className="flex items-center gap-2.5 px-5 py-3 bg-emerald-500/15 border border-emerald-500/25 rounded-lg text-emerald-400 hover:bg-emerald-500/25 transition-all text-sm"
+                  className="flex items-center justify-center gap-2.5 px-5 py-3.5 bg-emerald-500/15 border border-emerald-500/25 rounded-lg text-emerald-400 hover:bg-emerald-500/25 transition-all text-sm"
                 >
                   <Mail size={16} />
                   MarkStarr707@gmail.com
@@ -351,7 +370,7 @@ export default function Home() {
                   href="https://linkedin.com/in/markstarrcompliance"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2.5 px-5 py-3 bg-white/5 border border-white/10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all text-sm"
+                  className="flex items-center justify-center gap-2.5 px-5 py-3.5 bg-white/5 border border-white/10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all text-sm"
                 >
                   <Linkedin size={16} />
                   LinkedIn
@@ -360,7 +379,7 @@ export default function Home() {
                   href="https://github.com/MS-707"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2.5 px-5 py-3 bg-white/5 border border-white/10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all text-sm"
+                  className="flex items-center justify-center gap-2.5 px-5 py-3.5 bg-white/5 border border-white/10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all text-sm"
                 >
                   <Github size={16} />
                   GitHub
@@ -371,10 +390,10 @@ export default function Home() {
         </section>
 
         {/* Footer */}
-        <footer className="py-8 px-6 border-t border-white/5">
+        <footer className="py-10 px-6 border-t border-white/5">
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/30">
             <span>© {new Date().getFullYear()} Mark Starr</span>
-            <span>Created with purpose.</span>
+            <span className="text-white/20">Created with purpose.</span>
           </div>
         </footer>
       </div>

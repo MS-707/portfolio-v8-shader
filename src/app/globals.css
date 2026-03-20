@@ -32,3 +32,16 @@ body {
   background: rgba(0, 200, 140, 0.3);
   color: #fff;
 }
+
+/* Smooth scroll offset for fixed nav */
+[id] {
+  scroll-margin-top: 5rem;
+}
+
+/* Focus visible for keyboard nav */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid rgba(52, 211, 153, 0.7);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

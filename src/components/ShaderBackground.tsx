@@ -138,6 +138,14 @@ export default function ShaderBackground() {
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // Skip WebGL on mobile devices to save battery and improve performance
+    const isMobile = window.innerWidth < 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+    if (isMobile) {
+      containerRef.current.style.background =
+        "radial-gradient(ellipse at 30% 40%, rgba(0,50,40,0.6) 0%, rgba(5,12,45,0.4) 50%, rgba(2,3,8,1) 100%)";
+      return;
+    }
+
     const scene = new THREE.Scene();
     const camera = new THREE.Camera();
     camera.position.z = 1;
