@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Mail, Github, Linkedin, ExternalLink, ChevronDown, Menu, X } from "lucide-react";
 
 const ShaderBackground = dynamic(() => import("@/components/ShaderBackground"), {
@@ -94,8 +94,26 @@ const projects = [
   },
 ];
 
+/* ─── Scroll-driven hero opacity ─── */
+function useScrollFade() {
+  const [opacity, setOpacity] = useState(1);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const fadeEnd = window.innerHeight * 0.6;
+      setOpacity(Math.max(0, 1 - scrollY / fadeEnd));
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return opacity;
+}
+
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const heroOpacity = useScrollFade();
 
   return (
     <>
@@ -135,7 +153,7 @@ export default function Home() {
         </nav>
 
         {/* Hero Section */}
-        <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
+        <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center" style={{ opacity: heroOpacity, transform: `translateY(${(1 - heroOpacity) * -30}px)`, transition: "transform 0.05s linear" }}>
           <div className="max-w-3xl">
             <h1 className="text-5xl sm:text-7xl font-bold tracking-tight mb-6">
               Mark <span className="text-emerald-400">Starr</span>
