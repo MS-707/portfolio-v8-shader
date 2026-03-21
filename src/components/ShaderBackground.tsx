@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 const vertexShader = `
@@ -150,11 +150,44 @@ const fragmentShader = `
   }
 `;
 
+/** Static gradient fallback for reduced-motion preference */
+function StaticGradientFallback() {
+  return (
+    <div
+      className="fixed inset-0 w-full h-full"
+      style={{
+        zIndex: 0,
+        background:
+          "radial-gradient(ellipse at 30% 40%, rgba(16,185,129,0.25) 0%, transparent 60%), " +
+          "radial-gradient(ellipse at 70% 60%, rgba(59,130,246,0.2) 0%, transparent 60%), " +
+          "radial-gradient(ellipse at 50% 50%, rgba(139,92,246,0.15) 0%, transparent 70%), " +
+          "#050510",
+      }}
+      aria-hidden="true"
+    />
+  );
+}
+
 export default function ShaderBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef({ x: 0.5, y: 0.5 });
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  // Check for reduced motion preference
+  useEffect(() => {
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mql.matches);
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
+    };
+    mql.addEventListener("change", handleChange);
+    return () => mql.removeEventListener("change", handleChange);
+  }, []);
 
   useEffect(() => {
+    // Skip WebGL entirely when reduced motion is preferred
+    if (prefersReducedMotion) return;
     if (!containerRef.current) return;
 
     const isMobile =
@@ -206,11 +239,26 @@ export default function ShaderBackground() {
       window.addEventListener("mousemove", handleMouseMove);
     }
 
+    // Visibility tracking: pause shader when hero is scrolled offscreen
+    let isVisible = true;
+    const handleScroll = () => {
+      // The shader covers the full viewport height as a fixed background.
+      // Consider it "offscreen" once the user has scrolled past the hero
+      // (approximately one full viewport height).
+      const threshold = window.innerHeight;
+      isVisible = window.scrollY < threshold;
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
     let animationId: number;
     const clock = new THREE.Clock();
 
     const animate = () => {
       animationId = requestAnimationFrame(animate);
+
+      // Skip rendering when the hero section is not visible to save GPU cycles
+      if (!isVisible) return;
+
       uniforms.uTime.value = clock.getElapsedTime();
 
       if (!isMobile) {
@@ -229,6 +277,7 @@ export default function ShaderBackground() {
     return () => {
       cancelAnimationFrame(animationId);
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", handleScroll);
       if (!isMobile) {
         window.removeEventListener("mousemove", handleMouseMove);
       }
@@ -239,7 +288,12 @@ export default function ShaderBackground() {
         containerRef.current.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [prefersReducedMotion]);
+
+  // Render static gradient when reduced motion is preferred
+  if (prefersReducedMotion) {
+    return <StaticGradientFallback />;
+  }
 
   return (
     <div

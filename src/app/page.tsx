@@ -8,12 +8,31 @@ const ShaderBackground = dynamic(() => import("@/components/ShaderBackground"), 
   ssr: false,
 });
 
+/* ─── Reduced-motion detection hook ─── */
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
+  return reduced;
+}
+
 /* ─── Scroll-triggered reveal animation ─── */
 function useReveal(threshold = 0.15) {
   const ref = useRef<HTMLDivElement>(null);
+  const reducedMotion = usePrefersReducedMotion();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    // If reduced motion is preferred, show elements immediately
+    if (reducedMotion) {
+      setVisible(true);
+      return;
+    }
     const el = ref.current;
     if (!el) return;
     const observer = new IntersectionObserver(
@@ -22,13 +41,20 @@ function useReveal(threshold = 0.15) {
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [threshold]);
+  }, [threshold, reducedMotion]);
 
   return { ref, visible };
 }
 
 function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const { ref, visible } = useReveal(0.12);
+  const reducedMotion = usePrefersReducedMotion();
+
+  // When reduced motion is preferred, render children immediately with no animation
+  if (reducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <div
       ref={ref}
@@ -197,7 +223,7 @@ export default function Home() {
             <p className="text-xl sm:text-2xl text-white/70 font-light mb-3">
               Safety Engineer · Systems Thinker · Creator
             </p>
-            <p className="text-sm sm:text-base text-white/40 tracking-wide mb-12">
+            <p className="text-sm sm:text-base text-white/50 tracking-wide mb-12">
               CSP · ISO Lead Auditor · Designing safer workplaces through technology
             </p>
             <div className="flex items-center justify-center gap-6">
@@ -217,14 +243,14 @@ export default function Home() {
           </div>
           <a
             href="#about"
-            className="absolute bottom-12 animate-bounce text-white/30 hover:text-white/60 transition-colors"
+            className="absolute bottom-12 animate-bounce text-white/40 hover:text-white/60 transition-colors"
           >
             <ChevronDown size={28} />
           </a>
         </section>
 
         {/* About Section */}
-        <section id="about" className="py-28 sm:py-32 px-6">
+        <section id="about" className="scroll-mt-20 py-28 sm:py-32 px-6">
           <div className="max-w-4xl mx-auto">
             <Reveal>
             <div className="backdrop-blur-xl bg-black/70 border border-white/10 rounded-2xl p-8 sm:p-12">
@@ -286,7 +312,7 @@ export default function Home() {
         </section>
 
         {/* Career Section */}
-        <section id="career" className="py-28 sm:py-32 px-6">
+        <section id="career" className="scroll-mt-20 py-28 sm:py-32 px-6">
           <div className="max-w-4xl mx-auto">
             <Reveal>
             <h2 className="text-3xl font-bold mb-12 text-center">
@@ -304,11 +330,11 @@ export default function Home() {
                       <h3 className="text-xl font-semibold group-hover:text-emerald-400 transition-colors">
                         {job.company}
                       </h3>
-                      <p className="text-white/50 text-sm">
+                      <p className="text-white/60 text-sm">
                         {job.role} · {job.industry}
                       </p>
                     </div>
-                    <span className="text-sm text-white/40 whitespace-nowrap">
+                    <span className="text-sm text-white/50 whitespace-nowrap">
                       {job.period}
                     </span>
                   </div>
@@ -328,7 +354,7 @@ export default function Home() {
         </section>
 
         {/* Projects Section */}
-        <section id="projects" className="py-28 sm:py-32 px-6">
+        <section id="projects" className="scroll-mt-20 py-28 sm:py-32 px-6">
           <div className="max-w-5xl mx-auto">
             <Reveal>
             <h2 className="text-3xl font-bold mb-12 text-center">
@@ -354,20 +380,20 @@ export default function Home() {
                         href={project.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-white/30 hover:text-emerald-400 transition-colors flex-shrink-0 ml-2"
+                        className="text-white/40 hover:text-emerald-400 transition-colors flex-shrink-0 ml-2"
                       >
                         <ExternalLink size={16} />
                       </a>
                     )}
                   </div>
-                  <p className="text-white/50 text-sm mb-4 leading-relaxed">
+                  <p className="text-white/60 text-sm mb-4 leading-relaxed">
                     {project.description}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {project.tags.map((tag, j) => (
                       <span
                         key={j}
-                        className="text-xs px-2.5 py-1 rounded-full bg-white/5 text-white/40 border border-white/5"
+                        className="text-xs px-2.5 py-1 rounded-full bg-white/5 text-white/50 border border-white/5"
                       >
                         {tag}
                       </span>
@@ -398,7 +424,7 @@ export default function Home() {
                 I produce electronic music — released on
                 Dirtybird Records and featured on BBC Radio 1.
               </p>
-              <div className="flex items-center justify-center gap-4 text-sm text-white/40">
+              <div className="flex items-center justify-center gap-4 text-sm text-white/50">
                 <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
                   Dirtybird Records
                 </span>
@@ -412,14 +438,14 @@ export default function Home() {
         </section>
 
         {/* Contact Section */}
-        <section id="contact" className="py-28 sm:py-32 px-6">
+        <section id="contact" className="scroll-mt-20 py-28 sm:py-32 px-6">
           <div className="max-w-2xl mx-auto text-center">
             <Reveal>
             <div className="backdrop-blur-xl bg-black/70 border border-white/10 rounded-2xl p-8 sm:p-12">
               <h2 className="text-3xl font-bold mb-4">
                 Get in Touch<span className="text-emerald-400">.</span>
               </h2>
-              <p className="text-white/50 mb-10">
+              <p className="text-white/60 mb-10">
                 Open to conversations about safety at the frontier of AI,
                 EHS program design, or interesting problems worth solving.
               </p>
@@ -457,9 +483,9 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="py-10 px-6 border-t border-white/5">
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/30">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/40">
             <span>© {new Date().getFullYear()} Mark Starr</span>
-            <span className="text-white/20">Created with purpose.</span>
+            <span className="text-white/30">Created with purpose.</span>
           </div>
         </footer>
       </div>
